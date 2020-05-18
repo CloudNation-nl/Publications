@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: This template deploys a bastion host without an SSH keypair and inbound connectivity which can be used with ec2 instance connect and ssm
+
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: Select Amazon Linux 2
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  PrivateSubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet id which has at least a route to a NAT gateway.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC id of to create the instance in
+
+Resources:
+  BastionHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t2.nano
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroupIds:
+        - !Ref PrivateSecurityGroup
+      SubnetId: !Ref PrivateSubnetId
+      Tags:
+        - Key: Name
+          Value: bastion-host
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+       - !Ref InstanceRole
+
+  #Create Instance Roles & Policies
+  InstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      RoleName: "instance-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+
+  PrivateSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "private-sg"
+      GroupDescription: "Security group which allows no inbound connectivity"
+      VpcId: !Ref VpcId
+
