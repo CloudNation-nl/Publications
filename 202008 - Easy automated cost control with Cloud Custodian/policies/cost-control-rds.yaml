@@ -9,7 +9,7 @@ policies:
       - type: onhour
         weekends: false
         default_tz: cet
-        tag: offhours:OverrideDefaults
+        tag: offhours:OptIn
         opt-out: true
         onhour: 8
       - type: value
@@ -33,15 +33,15 @@ policies:
       schedule: "cron(0/15 * ? * * *)"
       role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
     filters:
-    - type: offhour
-      weekends: false
-      default_tz: cet
-      tag: offhours:OverrideDefaults
-      opt-out: true
-      offhour: 20
-    - type: value
-      key: Status
-      value: stopped
+      - type: offhour
+        weekends: false
+        default_tz: cet
+        tag: offhours:OptIn
+        opt-out: true
+        offhour: 20
+      - type: value
+        key: Status
+        value: stopped
     actions:
       - start
       - type: notify
