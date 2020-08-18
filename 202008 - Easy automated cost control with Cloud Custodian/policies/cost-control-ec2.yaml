@@ -1,0 +1,50 @@
+policies:
+  - name: offhours-ec2-stop
+    resource: ec2
+    mode:
+      type: periodic
+      schedule: "cron(0/15 * ? * * *)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    filters:
+      - type: onhour
+        weekends: false
+        default_tz: cet
+        tag: offhours:OptIn
+        opt-out: false
+        onhour: 8
+      - "tag:aws:autoscaling:groupName": absent
+    actions:
+      - stop
+      - type: notify
+        slack_template: slack
+        slack_msg_color: good
+        to:
+          - https://hooks.slack.com/services/ABCDEFGH/ABCDEFGHIJ/0123456789ABCDEFGHIIJKLMNOP
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/012345678901/c7n-mailer
+
+  - name: offhours-ec2-start
+    resource: ec2
+    mode:
+      type: periodic
+      schedule: "cron(0/15 * ? * * *)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    filters:
+      - type: offhour
+        weekends: false
+        default_tz: cet
+        tag: offhours:OptIn
+        opt-out: false
+        offhour: 20
+      - "tag:aws:autoscaling:groupName": absent
+    actions:
+      - start
+      - type: notify
+        slack_template: slack
+        slack_msg_color: good
+        to:
+          - https://hooks.slack.com/services/ABCDEFGH/ABCDEFGHIJ/0123456789ABCDEFGHIIJKLMNOP
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/012345678901/c7n-mailer

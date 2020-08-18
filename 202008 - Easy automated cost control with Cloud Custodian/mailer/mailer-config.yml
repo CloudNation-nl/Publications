@@ -1,0 +1,5 @@
+queue_url: <your queue url here, e.g. https://sqs.eu-central-1.amazonaws.com/012345678901/cloud-custodian-mailer-queue
+role: <your role arn here, e.g. arn:aws:iam::012345678901:role/CloudCustodianAdminRole>
+from_address: <your from email here, e.g. cost-control-officer@your-company.com>
+region: <your region here, e.g. eu-west-1>
+

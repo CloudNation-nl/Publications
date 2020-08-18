@@ -1,0 +1,17 @@
+policies:
+  - name: offhours-stop
+    resource: ec2
+    mode:
+      type: periodic
+      schedule: "cron(0/15 * ? * * *)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    filters:
+      - type: offhour
+        weekends: False
+        default_tz: "cet"
+        opt-out: False
+        tag: "offhours:OptIn"
+        offhour: 19
+        state-filter: True
+    actions:
+      - stop

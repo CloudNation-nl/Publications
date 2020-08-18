@@ -1,0 +1,54 @@
+policies:
+  - name: offhours-rds-stop
+    resource: rds
+    mode:
+      type: periodic
+      schedule: "cron(0/15 * ? * * *)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    filters:
+      - type: onhour
+        weekends: false
+        default_tz: cet
+        tag: offhours:OverrideDefaults
+        opt-out: true
+        onhour: 8
+      - type: value
+        key: Status
+        value: available
+    actions:
+      - stop
+      - type: notify
+        slack_template: slack
+        slack_msg_color: good
+        to:
+          - https://hooks.slack.com/services/ABCDEFGH/ABCDEFGHIJ/0123456789ABCDEFGHIIJKLMNOP
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/012345678901/c7n-mailer
+
+  - name: offhours-start
+    resource: rds
+    mode:
+      type: periodic
+      schedule: "cron(0/15 * ? * * *)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    filters:
+    - type: offhour
+      weekends: false
+      default_tz: cet
+      tag: offhours:OverrideDefaults
+      opt-out: true
+      offhour: 20
+    - type: value
+      key: Status
+      value: stopped
+    actions:
+      - start
+      - type: notify
+        slack_template: slack
+        slack_msg_color: good
+        to:
+          - https://hooks.slack.com/services/ABCDEFGH/ABCDEFGHIJ/0123456789ABCDEFGHIIJKLMNOP
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/012345678901/c7n-mailer

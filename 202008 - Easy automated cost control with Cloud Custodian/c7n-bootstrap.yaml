@@ -1,0 +1,60 @@
+Resources:
+  CloudCustodianAdminRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+      - !Ref CloudCustodianPerms
+      RoleName: CloudCustodianAdminRole
+
+  CloudCustodianPerms:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "ec2:Stop*"
+              - "ec2:Start*"
+              - "rds:Start*"
+              - "rds:Stop*"
+              - "autoscaling:SuspendProcesses"
+              - "autoscaling:ResumeProcesses"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - "sqs:Change*"
+              - "sqs:Send*"
+              - "sqs:Tag*"
+              - "sqs:Untag*"
+            Resource: !GetAtt SQSMailer.Arn
+
+
+
+  SQSMailer:
+    Condition: HasMailer
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: cloud-custodian-mailer-queue
+
+Parameters:
+  IncludeC7NMailerSupport:
+    Type: String
+    AllowedValues: ["True", "False"]
+
+Conditions:
+  HasMailer: !Equals [!Ref IncludeC7NMailerSupport, "True"]
+
+
+Outputs:
+  SQSMailer:
+      Description: URL of the SQS queue to be used in c7n_mailer_config/mailer.yml
+      Value: !Ref SQSMailer
