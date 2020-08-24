@@ -12,7 +12,7 @@ aws cloudformation deploy --stack-name c7n-bootstrap --template-file c7n-bootstr
 ```
 This deploys a role and SQS queue used by the mailer. 
 
-> NOTE: Make sure to update the mailer/mailer-config and the 'notify' actions in the policies with your SQS queue!
+> NOTE: Make sure to update the `mailer/mailer-config.yaml` and the 'notify' actions in the policies with your SQS queue!
 
 ## Creating a policy
 Deploying a policy can be done with the command `custodian run -s . cost-control-ec2-simple.yaml`
