@@ -15,14 +15,19 @@ This deploys a role and SQS queue used by the mailer.
 > NOTE: Make sure to update the `mailer/mailer-config.yaml` and the 'notify' actions in the policies with your SQS queue!
 
 ## Creating a policy
-Deploying a policy can be done with the command `custodian run -s . cost-control-ec2-simple.yaml`
+Deploying a policy can be done with the command `custodian run -s . <policy name>`.
 
-To deploy a whole folder of policies, first update the mailer confgiuratin and notification action in the policies. Then run
+To deploy a whole folder of policies, first update the mailer configuration and notification action in the policies. Then run
 ```
 custodian run -s . policies/* 
 ```
 
 This will deploy lambda's in your AWS environment, which automatically shuts down resources.
 
-##
+## Tagging resources
+Make sure to tag the resources to be shut down using tags with a key of `offhours:OptIn` and a value of `on`. 
+This can also be found in the 'offhours' policy documentation of cloud custodian.
+
+## Further reading
+For more information, please visit the documentation at https://cloudcustodian.io/
 `
